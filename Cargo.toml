@@ -7,7 +7,12 @@ edition = "2018"
 [dependencies]
 image = "^0.22.0"
 num-complex = "^0.1.12"
+num = "^0.1.12"
 
 [[bin]]
 name = "mandel_tut_rust"
 path = "main.rs"
+
+[[bin]]
+name = "mandel_tut_rust_vec"
+path = "vecmain.rs"
