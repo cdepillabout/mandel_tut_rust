@@ -5,6 +5,7 @@ authors = ["g_martins"]
 edition = "2018"
 
 [dependencies]
+cgmath = "^0.17.0"
 image = "^0.22.0"
 num-complex = "^0.1.12"
 num = "^0.1.12"
@@ -16,3 +17,7 @@ path = "main.rs"
 [[bin]]
 name = "mandel_tut_rust_vec"
 path = "vecmain.rs"
+
+[[bin]]
+name = "mandel_tut_rust_vec2"
+path = "vecmain2.rs"
