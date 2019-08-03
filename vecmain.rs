@@ -2,38 +2,23 @@ extern crate image;
 extern crate num;
 extern crate num_complex;
 
-use std::ops::Add;
-use std::ops::Div;
-use std::ops::Mul;
-use std::ops::Sub;
-
-// use std::fs::File;
-// use std::path::Path;
+use image::ImageBuffer;
+use image::ImageLuma8;
+use image::Luma;
 use num::Complex;
 use num::Float;
-// use num_complex::Complex;
-use image::ImageBuffer;
-use image::Luma;
+use num::Num;
+use std::fs::File;
+use std::path::Path;
 
 struct Bound<T> {
     min: T,
     max: T,
 }
 
-// fn calc_scale<T, U>(lala: &Bound<T>, img_size: U) -> T
-//     where T: Sub + Div,
-//           U: Clone + Into<T>
-
-// {
-//   // (self.max - self.min)  / T::from(img_size)
-//   // (self.max - self.min)  - T::from(img_size)
-//   // T::from(img_size)
-//   img_size.into()
-// }
-
 impl<T> Bound<T>
 where
-    T: Sub<Output = T> + Div<Output = T> + Copy,
+    T: Num + Copy,
 {
     fn scale<U: Into<T>>(&self, img_size: U) -> T {
         (self.max - self.min) / img_size.into()
@@ -41,7 +26,7 @@ where
 }
 
 fn main() {
-    let max_iterations = 100u16;
+    let max_iterations = 512u16;
     let img_size = 800u16;
 
     let cx_bound = Bound {
@@ -59,7 +44,8 @@ fn main() {
     dbg!(cx_bound.scale(img_size));
     dbg!(cy_bound.scale(img_size));
 
-    draw_mandel(max_iterations, img_size, 2.0_f32, &cx_bound, &cy_bound);
+    let img_buf = draw_mandel(max_iterations, img_size, 2.0_f32, &cx_bound, &cy_bound);
+    print_buf(img_buf);
 }
 
 fn draw_mandel<T>(
@@ -76,11 +62,11 @@ where
         image::ImageBuffer::new(img_size.into(), img_size.into());
 
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-        let x_T: T = (x as u16).into();
-        let y_T: T = (y as u16).into();
+        let x_t: T = (x as u16).into();
+        let y_t: T = (y as u16).into();
 
-        let cx = cx_bound.min + x_T * cx_bound.scale(img_size);
-        let cy = cy_bound.min + y_T * cy_bound.scale(img_size);
+        let cx = cx_bound.min + x_t * cx_bound.scale(img_size);
+        let cy = cy_bound.min + y_t * cy_bound.scale(img_size);
 
         let c = Complex::new(cx, cy);
         let mut z = Complex::new(T::zero(), T::zero());
@@ -90,10 +76,18 @@ where
             if z.norm() > norm_breakpoint {
                 break;
             }
-            // z = z * z + c;
-            // i = t;
+            z = z * z + c;
+            i = t;
         }
+
+        *pixel = image::Luma([i as u8]);
     }
 
     imgbuf
+}
+
+fn print_buf(imgbuf: ImageBuffer<Luma<u8>, Vec<u8>>) {
+    let path = Path::new("fractal.png");
+    File::create("fractal.png").unwrap();
+    ImageLuma8(imgbuf).save(path).unwrap();
 }
