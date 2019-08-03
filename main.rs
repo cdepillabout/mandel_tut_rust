@@ -4,6 +4,8 @@ extern crate num_complex;
 use std::fs::File;
 use std::path::Path;
 use num_complex::Complex;
+use image::ImageBuffer;
+use image::Luma;
  
 fn main(){
     let max_iterations = 512u16;
@@ -15,7 +17,8 @@ fn main(){
     let scalex = calc_scalex(cxmax, cxmin, img_size);
     let scaley = calc_scaley(cymax, cymin, img_size);
   
-    draw_mandel(max_iterations, img_size, cxmin, cymin, scalex, scaley);
+    let foo = draw_mandel(max_iterations, img_size, cxmin, cymin, scalex, scaley);
+    print_buf(foo);
 }
 
 fn calc_scalex(cxmax:f32, cxmin:f32, img_size:u32) -> f32{
@@ -26,7 +29,7 @@ fn calc_scaley(cymax:f32, cymin:f32, img_size:u32) -> f32{
     (cymax - cymin) / img_size as f32
 }
 
-fn draw_mandel(max_iterations:u16, img_size:u32, cxmin:f32, cymin:f32, scalex:f32, scaley:f32) {
+fn draw_mandel(max_iterations:u16, img_size:u32, cxmin:f32, cymin:f32, scalex:f32, scaley:f32) -> ImageBuffer<Luma<u8>, Vec<u8>> {
 
     let mut imgbuf = image::ImageBuffer::new(img_size, img_size);
 
@@ -49,8 +52,11 @@ fn draw_mandel(max_iterations:u16, img_size:u32, cxmin:f32, cymin:f32, scalex:f3
         *pixel = image::Luma([i as u8]);
     }
 
+    return imgbuf;
+}
+
+fn print_buf(imgbuf: ImageBuffer<Luma<u8>, Vec<u8>>) {
     let path = Path::new("fractal.png");
     let fout = &mut File::create("fractal.png").unwrap();
     image::ImageLuma8(imgbuf).save(path).unwrap();
-
 }
